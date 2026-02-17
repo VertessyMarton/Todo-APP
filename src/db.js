@@ -1,9 +1,9 @@
 import { DatabaseSync } from "node:sqlite"
 
-const db = new DatabaseSync(":memory:")
+const db = new DatabaseSync("./database.db")
 
 db.exec(`
-    CREATE TABLE users (
+    CREATE TABLE IF NOT EXISTS users  (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password TEXT
@@ -11,7 +11,7 @@ db.exec(`
 `)
 
 db.exec(`
-    CREATE TABLE todos (
+    CREATE TABLE IF NOT EXISTS todos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         task TEXT,
