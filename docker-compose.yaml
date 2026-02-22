@@ -10,10 +10,12 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - db:
-          condition: service_healthy
+      db:
+        condition: service_healthy
     volumes:
       - .:/app
+      - /app/node_modules
+      - /app/src/generated
 
   db:
     image: postgres:16-alpine
