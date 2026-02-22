@@ -1,26 +1,33 @@
 import express from "express"
-import db from "../db.js"
+import prisma from "../prismaClient.js"
 
 const router = express.Router()
 
-router.get("/", (req, res) => {
-    const getTodos = db.prepare(`SELECT * FROM todos WHERE user_id = ?`)
-    const todos = getTodos.all(req.userId)
+router.get("/", async (req, res) => {
+    const todos = await prisma.todo.findMany({
+        where: {
+            userId: req.userId
+        }
+    })
     res.json({todos})
 })
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
     const { task } = req.body
 
     if (!task) { return res.status(400).json({ error: "Task is empty" }) }
 
-    const insertTodo = db.prepare(`INSERT INTO todos (user_id, task) VALUES(?, ?)`)
-    insertTodo.run(req.userId, task)
-    res.json({ id: req.userId, task, completed: 0 })
+    const insertTodo = await prisma.todo.create({
+        data: {
+            task,
+            userId: req.userId
+        }
+    })
+    res.json(insertTodo)
 
 })
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
     const { completed } = req.body
     const { id } = req.params
 
@@ -28,17 +35,29 @@ router.put("/:id", (req, res) => {
     return res.status(400).json({ error: "Invalid completed value" })
 }
 
-     const updateTodo = db.prepare(`UPDATE todos SET completed = ? WHERE id = ? AND user_id = ?`)
-     updateTodo.run(completed ? 1 : 0, id, req.userId)
+      const updatedTodo = await prisma.todo.update({
+        where: {
+            id: parseInt(id),
+            userId: req.userId
+        },
+        data: {
+            completed: !!completed
+        }
+    })
 
-     res.json({ message: "Completed status chenged" })
+     res.json(updatedTodo)
 })
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", async (req, res) => {
     const { id } = req.params
+    const userId = req.userId
 
-    const deleteTodo = db.prepare(`DELETE FROM todos WHERE id = ? AND user_id = ?`)
-    deleteTodo.run(id, req.userId)
+    await prisma.todo.delete({
+        where: {
+            id: parseInt(id),
+            userId
+        }
+    })
 
     res.json({ message: "Todo deleted" })
 })
