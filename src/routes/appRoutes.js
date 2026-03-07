@@ -1,5 +1,6 @@
 import express from "express"
 import prisma from "../prismaClient.js"
+import AppError from "../utils/AppError.js"
 
 const router = express.Router()
 
