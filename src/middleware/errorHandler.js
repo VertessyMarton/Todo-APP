@@ -1,5 +1,6 @@
 import AppError from "../utils/AppError.js"
 import { mapPrismaError } from "../utils/prismaErrorMap.js";
+import { ZodError } from "zod";
 
 export default function errorHandler(err, req, res, next) {
     if(res.headersSent) {
@@ -25,6 +26,17 @@ export default function errorHandler(err, req, res, next) {
         code = err.code || code
         details = err.details
     }
+
+    if (err instanceof ZodError) {
+    statusCode = 400;
+    message = "Validation failed";
+    code = "VALIDATION_ERROR";
+
+    details = err.issues.map(e => ({
+      path: e.path.join("."),
+      message: e.message
+    }));
+  }
 
     console.error({
         name: err.name,
