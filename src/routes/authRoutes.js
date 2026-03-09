@@ -3,49 +3,28 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import prisma from "../prismaClient.js"
 import AppError from "../utils/AppError.js"
+import validate from "../middleware/validationMiddleware.js"
+import { registerSchema, loginSchema } from "./authValidation.js"
 
 
 const router = express.Router()
 
-router.post("/register", async (req, res) => {
+router.post("/register", validate(registerSchema), async (req, res) => {
     const { username, password } = req.body
-
-    if (!username || !password) {
-        return res.status(400).json({ error: "username and password are required" })
-    }
-    if (typeof username !== "string" || typeof password !== "string") {
-        return res.status(400).json({ error: "username and password must be strings" })
-    }
-
-    const cleanUsername = username.trim()
-
-    if (cleanUsername.length < 3) {
-        return res.status(400).json({ error: "username must be at least 3 characters" })
-    }
-    if (password.length < 8) {
-        return res.status(400).json({ error: "password must be at least 8 characters" })
-    }
 
     const hashedPassword = bcrypt.hashSync(password, 8) 
 
     const user = await prisma.user.create({
         data: {
-            username: cleanUsername,
+            username: username,
             password: hashedPassword
         }
     })
     return res.sendStatus(201)
 })
 
-router.post("/login", async (req, res) => {
+router.post("/login", validate(loginSchema), async (req, res) => {
     const {username, password} = req.body
-
-    if (!username || !password) {
-        return res.status(400).json({ error: "username and password are required" })
-    }
-    if (typeof username !== "string" || typeof password !== "string") {
-        return res.status(400).json({ error: "username and password must be strings" })
-    }
 
     const user = await prisma.user.findUnique({
          where: {

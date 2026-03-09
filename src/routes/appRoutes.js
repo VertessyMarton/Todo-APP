@@ -1,6 +1,11 @@
 import express from "express"
 import prisma from "../prismaClient.js"
-import AppError from "../utils/AppError.js"
+import {  
+    insertTodoSchema,
+    deleteTodoSchema,
+    updateTodoSchema 
+} from "./todoValidation.js"
+import validate from "../middleware/validationMiddleware.js"
 
 const router = express.Router()
 
@@ -13,10 +18,8 @@ router.get("/", async (req, res) => {
     res.json({todos})
 })
 
-router.post("/", async (req, res) => {
+router.post("/", validate(insertTodoSchema), async (req, res) => {
     const { task } = req.body
-
-    if (!task) { return res.status(400).json({ error: "Task is empty" }) }
 
     const insertTodo = await prisma.todo.create({
         data: {
@@ -28,13 +31,9 @@ router.post("/", async (req, res) => {
 
 })
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", validate(updateTodoSchema), async (req, res) => {
     const { completed } = req.body
     const { id } = req.params
-
-    if (typeof completed !== "boolean") {
-    return res.status(400).json({ error: "Invalid completed value" })
-}
 
       const updatedTodo = await prisma.todo.update({
         where: {
@@ -42,20 +41,20 @@ router.put("/:id", async (req, res) => {
             userId: req.userId
         },
         data: {
-            completed: !!completed
+            completed: completed
         }
     })
 
      res.json(updatedTodo)
 })
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", validate(deleteTodoSchema), async (req, res) => {
     const { id } = req.params
     const userId = req.userId
 
     await prisma.todo.delete({
         where: {
-            id: parseInt(id),
+            id: id,
             userId
         }
     })
