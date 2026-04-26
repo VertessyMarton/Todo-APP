@@ -67,7 +67,3 @@ API runs on `http://localhost:3000`.
 | PUT | `/todos/:id` | Yes | Update todo completion state |
 | DELETE | `/todos/:id` | Yes |  Delete a todo |
 
-## Database Schema
-
-The full schema is maintained in [`prisma/schema.prisma`](./prisma/schema.prisma).
-
