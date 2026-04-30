@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "devStart": "node --watch --env-file=.env ./src/server.js",
+    "start": "node ./src/server.js",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:generate": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

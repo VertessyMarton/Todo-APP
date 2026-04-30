@@ -1,21 +1,37 @@
 services:
-  app:
-    build: .
-    container_name: todo-app
+  backend:
+    build:
+      context: ./backend
+    container_name: todo-backend
+    env_file:
+      - ./backend/.env
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/todoapp?schema=public
+      FRONTEND_URL: http://localhost:4200
+      NODE_ENV: development
+      PORT: 3000
     ports:
       - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/src/generated
+      - ./backend:/app
+      - backend-node-modules:/app/node_modules
+      - backend-generated:/app/src/generated
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: todo-frontend
+    command: npm start -- --host 0.0.0.0
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
 
   db:
     image: postgres:16-alpine
@@ -35,4 +51,7 @@ services:
       retries: 30
 
 volumes:
+  backend-node-modules:
+  backend-generated:
+  frontend-node-modules:
   postgres-data:

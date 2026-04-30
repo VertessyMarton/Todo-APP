@@ -16,6 +16,7 @@ A backend learning project built to practice RESTful API concepts
 
 - Runtime: Node.js
 - Framework: Express
+- Frontend: Angular
 - Database: PostgreSQL
 - ORM: Prisma
 - Password hashing: `bcryptjs`
@@ -23,47 +24,35 @@ A backend learning project built to practice RESTful API concepts
 
 ## Installation & Setup
 
-1. Clone the repository:
+#### 1. Clone the repository:
 
 ```bash
 git clone https://github.com/VertessyMarton/Todo-API
 ```
 
-2. Rename environment file and set values:
+#### 2. Rename environment file and set values:
 
 ```bash
-mv .env.example .env
+cp backend/.env.example backend/.env
 ```
 
-3. Build containers:
+#### 3. Build and start containers:
 
 ```bash
-docker compose build
-```
-
-4. Run database migrations:
-
-```bash
-docker compose run app npx prisma migrate deploy
-```
-
-5. Start the services:
-
-```bash
-docker compose up
+docker compose up --build
 ```
 
 API runs on `http://localhost:3000`.
+Frontend runs on `http://localhost:4200`.
 
 ## API Endpoints
 
-| Method | Endpoint | Authentication | Description |
-|---|---|---|---|
-| GET | `/` | No | Health check |
-| POST | `/auth/register` | No | Register a new user |
-| POST | `/auth/login` | No | Login and receive JWT token |
-| GET | `/todos` | Yes | List  user's todos |
-| POST | `/todos` | Yes | Create a todo | 
-| PUT | `/todos/:id` | Yes | Update todo completion state |
-| DELETE | `/todos/:id` | Yes |  Delete a todo |
-
+| Method | Endpoint         | Authentication | Description                  |
+| ------ | ---------------- | -------------- | ---------------------------- |
+| GET    | `/`              | No             | Health check                 |
+| POST   | `/auth/register` | No             | Register a new user          |
+| POST   | `/auth/login`    | No             | Login and receive JWT token  |
+| GET    | `/todos`         | Yes            | List user's todos            |
+| POST   | `/todos`         | Yes            | Create a todo                |
+| PUT    | `/todos/:id`     | Yes            | Update todo completion state |
+| DELETE | `/todos/:id`     | Yes            | Delete a todo                |
