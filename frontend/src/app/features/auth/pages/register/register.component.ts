@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -14,14 +13,14 @@ export class RegisterComponent {
   username = '';
   password = '';
   confirmPassword = '';
-  successMessage = '';
-  errorMessage = '';
-  isSubmitting = false;
+  successMessage = signal('');
+  errorMessage = signal('');
+  isSubmitting = signal(false);
 
   onSubmit() {
-    this.successMessage = '';
-    this.errorMessage = '';
-    this.isSubmitting = true;
+    this.successMessage.set('');
+    this.errorMessage.set('');
+    this.isSubmitting.set(true);
 
     this.auth
       .register({
@@ -31,12 +30,12 @@ export class RegisterComponent {
       })
       .subscribe({
         next: () => {
-          this.successMessage = 'Account created successfully. You can now sign in.';
-          this.isSubmitting = false;
+          this.successMessage.set('Account created successfully. You can now sign in.');
+          this.isSubmitting.set(false);
         },
         error: () => {
-          this.errorMessage = 'Registration failed. Please try again.';
-          this.isSubmitting = false;
+          this.errorMessage.set('Registration failed. Please try again.');
+          this.isSubmitting.set(false);
         },
       });
   }

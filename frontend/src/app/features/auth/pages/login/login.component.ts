@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -13,14 +12,14 @@ export class LoginComponent {
   constructor(private auth: AuthService) {}
   username = '';
   password = '';
-  successMessage = '';
-  errorMessage = '';
-  isSubmitting = false;
+  successMessage = signal('');
+  errorMessage = signal('');
+  isSubmitting = signal(false);
 
   onSignIn() {
-    this.successMessage = '';
-    this.errorMessage = '';
-    this.isSubmitting = true;
+    this.successMessage.set('');
+    this.errorMessage.set('');
+    this.isSubmitting.set(true);
 
     this.auth
       .login({
@@ -29,12 +28,12 @@ export class LoginComponent {
       })
       .subscribe({
         next: () => {
-          this.successMessage = 'Logged in successfully.';
-          this.isSubmitting = false;
+          this.successMessage.set('Logged in successfully.');
+          this.isSubmitting.set(false);
         },
         error: () => {
-          this.errorMessage = 'Login failed. Please try again.';
-          this.isSubmitting = false;
+          this.errorMessage.set('Login failed. Please try again.');
+          this.isSubmitting.set(false);
         },
       });
   }
