@@ -11,14 +11,14 @@ import { FormsModule } from '@angular/forms';
 })
 export class RegisterComponent {
   constructor(private auth: AuthService) {}
-  email = '';
+  username = '';
   password = '';
   confirmPassword = '';
 
   onSubmit() {
     this.auth
       .register({
-        email: this.email,
+        username: this.username,
         password: this.password,
         confirmPassword: this.confirmPassword,
       })

@@ -2,9 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 type RegisterPaylaod = {
-  email: string;
+  username: string;
   password: string;
   confirmPassword: string;
+};
+
+type LoginPaylaod = {
+  username: string;
+  password: string;
 };
 
 @Injectable({
@@ -17,5 +22,9 @@ export class AuthService {
 
   register(payload: RegisterPaylaod) {
     return this.http.post(`${this.apiUrl}/auth/register`, payload);
+  }
+
+  login(payload: LoginPaylaod) {
+    return this.http.post(`${this.apiUrl}/auth/login`, payload);
   }
 }
