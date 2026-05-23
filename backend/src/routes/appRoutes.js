@@ -6,10 +6,11 @@ import {
     updateTodoSchema 
 } from "./todoValidation.js"
 import validate from "../middleware/validationMiddleware.js"
+import { MutationLimit, ReadLimit } from "../middleware/rateLimitMiddleware.js"
 
 const router = express.Router()
 
-router.get("/", async (req, res) => {
+router.get("/", ReadLimit ,async (req, res) => {
     const todos = await prisma.todo.findMany({
         where: {
             userId: req.userId
@@ -18,7 +19,7 @@ router.get("/", async (req, res) => {
     res.json({todos})
 })
 
-router.post("/", validate(insertTodoSchema), async (req, res) => {
+router.post("/", validate(insertTodoSchema), MutationLimit, async (req, res) => {
     const { task } = req.body
 
     const insertTodo = await prisma.todo.create({
@@ -31,7 +32,7 @@ router.post("/", validate(insertTodoSchema), async (req, res) => {
 
 })
 
-router.put("/:id", validate(updateTodoSchema), async (req, res) => {
+router.put("/:id", validate(updateTodoSchema), MutationLimit, async (req, res) => {
     const { completed } = req.body
     const { id } = req.params
 
@@ -48,7 +49,7 @@ router.put("/:id", validate(updateTodoSchema), async (req, res) => {
      res.json(updatedTodo)
 })
 
-router.delete("/:id", validate(deleteTodoSchema), async (req, res) => {
+router.delete("/:id", validate(deleteTodoSchema), MutationLimit, async (req, res) => {
     const { id } = req.params
     const userId = req.userId
 
