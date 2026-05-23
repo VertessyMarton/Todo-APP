@@ -3,7 +3,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('accessToken');
 
-  if (!token || !req.url.startsWith('http://localhost:3000')) {
+  if (!token || !req.url.startsWith('https://todo-api-n26l.onrender.com')) {
     return next(req);
   }
 

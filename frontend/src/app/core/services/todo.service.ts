@@ -16,7 +16,7 @@ type TodosResponse = {
   providedIn: 'root',
 })
 export class TodoService {
-  private readonly apiUrl = 'http://localhost:3000/todos';
+  private readonly apiUrl = 'https://todo-api-n26l.onrender.com/todos';
 
   constructor(private http: HttpClient) {}
 

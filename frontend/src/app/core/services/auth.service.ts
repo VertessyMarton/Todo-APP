@@ -20,7 +20,7 @@ type LoginResponse = {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = 'https://todo-api-n26l.onrender.com';
 
   constructor(private http: HttpClient) {}
 
