@@ -12,6 +12,10 @@ type LoginPaylaod = {
   password: string;
 };
 
+type LoginResponse = {
+  accessToken: string;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -25,6 +29,18 @@ export class AuthService {
   }
 
   login(payload: LoginPaylaod) {
-    return this.http.post(`${this.apiUrl}/auth/login`, payload);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, payload);
+  }
+
+  saveToken(token: string) {
+    localStorage.setItem('accessToken', token);
+  }
+
+  getToken() {
+    return localStorage.getItem('accessToken');
+  }
+
+  isLoggedIn() {
+    return !!this.getToken();
   }
 }
