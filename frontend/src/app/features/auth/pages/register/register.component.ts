@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -9,16 +10,17 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+  ) {}
   username = '';
   password = '';
   confirmPassword = '';
-  successMessage = signal('');
   errorMessage = signal('');
   isSubmitting = signal(false);
 
   onSubmit() {
-    this.successMessage.set('');
     this.errorMessage.set('');
     this.isSubmitting.set(true);
 
@@ -30,8 +32,10 @@ export class RegisterComponent {
       })
       .subscribe({
         next: () => {
-          this.successMessage.set('Account created successfully. You can now sign in.');
           this.isSubmitting.set(false);
+          this.router.navigate(['/login'], {
+            state: { message: 'Account created successfully. You can now sign in.' },
+          });
         },
         error: () => {
           this.errorMessage.set('Registration failed. Please try again.');
