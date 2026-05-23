@@ -13,7 +13,13 @@ export class LoginComponent {
   constructor(
     private auth: AuthService,
     private router: Router,
-  ) {}
+  ) {
+    const message = this.router.currentNavigation()?.extras.state?.['message'];
+
+    if (message) {
+      this.successMessage.set(message);
+    }
+  }
 
   username = '';
   password = '';
