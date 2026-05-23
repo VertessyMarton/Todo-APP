@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -9,7 +10,11 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+  ) {}
+
   username = '';
   password = '';
   successMessage = signal('');
@@ -27,9 +32,10 @@ export class LoginComponent {
         password: this.password,
       })
       .subscribe({
-        next: () => {
-          this.successMessage.set('Logged in successfully.');
+        next: (response) => {
+          this.auth.saveToken(response.accessToken);
           this.isSubmitting.set(false);
+          this.router.navigate(['/todos']);
         },
         error: () => {
           this.errorMessage.set('Login failed. Please try again.');
