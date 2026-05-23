@@ -14,13 +14,14 @@ router.post("/register", validate(registerSchema), async (req, res) => {
 
     const hashedPassword = bcrypt.hashSync(password, 8) 
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
         data: {
             username: username,
             password: hashedPassword
         }
     })
-    return res.sendStatus(201)
+
+    return res.status(201).json({ message: "User registered successfully" })
 })
 
 router.post("/login", validate(loginSchema), async (req, res) => {
@@ -39,8 +40,8 @@ router.post("/login", validate(loginSchema), async (req, res) => {
     if (!passwordIsValid) { throw AppError.unauthorized("Invalid credentials") }
 
     if (passwordIsValid) { 
-        const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: "1h"})
-        return res.json({ token })
+        const accessToken = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: "1h"})
+        return res.json({ accessToken })
     }
 })
 
