@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { API_URL } from '../api-url';
 
 export type Todo = {
   id: number;
@@ -16,7 +17,7 @@ type TodosResponse = {
   providedIn: 'root',
 })
 export class TodoService {
-  private readonly apiUrl = 'https://todo-api-n26l.onrender.com/todos';
+  private readonly apiUrl = `${API_URL}/todos`;
 
   constructor(private http: HttpClient) {}
 

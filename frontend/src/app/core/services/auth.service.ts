@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { API_URL } from '../api-url';
 
 type RegisterPaylaod = {
   username: string;
@@ -20,7 +21,7 @@ type LoginResponse = {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = 'https://todo-api-n26l.onrender.com';
+  private readonly apiUrl = API_URL;
 
   constructor(private http: HttpClient) {}
 
