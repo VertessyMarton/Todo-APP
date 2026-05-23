@@ -11,7 +11,8 @@ export default function errorHandler(err, req, res, next) {
     err = AppError.badRequest("Malformed JSON body");
     }
 
-    const isProd = process.env.NODE_ENV === "production";
+    const nodeEnv = (process.env.NODE_ENV || "").trim().replace(/^["']|["']$/g, "");
+    const isProd = nodeEnv === "production";
 
     err = mapPrismaError(err);
 
@@ -41,9 +42,9 @@ export default function errorHandler(err, req, res, next) {
     console.error({
         name: err.name,
         message: err.message,
-        stack: err.stack,
         method: req.method,
-        path: req.originalUrl
+        path: req.originalUrl,
+        ...(isProd ? {} : { stack: err.stack }),
     })
 
     res.status(statusCode).json({
