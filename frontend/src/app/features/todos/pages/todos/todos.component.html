@@ -1,1 +1,68 @@
-<p>todos works!</p>
+<main class="todos-page">
+  <section class="todos-shell" aria-labelledby="todos-title">
+    <header class="todos-header">
+      <div>
+        <h1 id="todos-title">Your todos</h1>
+      </div>
+
+      <button class="logout-button" type="button" (click)="logout()">Sign out</button>
+    </header>
+
+    <form class="todo-form" (ngSubmit)="addTodo()">
+      <label class="sr-only" for="todo-title">New todo</label>
+      <input
+        id="todo-title"
+        type="text"
+        name="todo-title"
+        placeholder="Add a new task..."
+        [ngModel]="newTask()"
+        (ngModelChange)="newTask.set($event)"
+      />
+      <button type="submit" [disabled]="isAdding() || !newTask().trim()">
+        {{ isAdding() ? 'Adding...' : 'Add' }}
+      </button>
+    </form>
+
+    @if (errorMessage()) {
+      <p class="message error-message" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="todo-toolbar" aria-label="Todo filters">
+      <button class="filter-button" [class.active]="filter() === 'all'" type="button" (click)="setFilter('all')">
+        All
+      </button>
+      <button class="filter-button" [class.active]="filter() === 'active'" type="button" (click)="setFilter('active')">
+        Active
+      </button>
+      <button class="filter-button" [class.active]="filter() === 'done'" type="button" (click)="setFilter('done')">
+        Done
+      </button>
+    </div>
+
+    @if (isLoading()) {
+      <p class="message loading-message" role="status">Loading todos...</p>
+    } @else if (visibleTodos().length > 0) {
+      <section class="todo-list" aria-label="Todo list">
+        @for (todo of visibleTodos(); track todo.id) {
+          <article class="todo-item" [class.completed]="todo.completed">
+            <label class="check-control">
+              <input type="checkbox" [checked]="todo.completed" (change)="toggleTodo(todo)" />
+              <span></span>
+            </label>
+
+            <div class="todo-content">
+              <h2>{{ todo.task }}</h2>
+            </div>
+
+            <button class="icon-button" type="button" (click)="deleteTodo(todo.id)">Delete</button>
+          </article>
+        }
+      </section>
+    } @else {
+      <section class="empty-state" aria-label="No todos">
+        <h2>No todos yet</h2>
+        <p>Add your first task and keep the day moving.</p>
+      </section>
+    }
+  </section>
+</main>
