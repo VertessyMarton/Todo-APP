@@ -4,6 +4,8 @@ A full-stack todo application with user authentication, protected todo routes, a
 
 ## Live Demo
 
+On first call, backend service could take up to 50s to wake up!
+
 The project is deployed on Render:
 
 - Angular frontend: https://todo-app-98g2.onrender.com
