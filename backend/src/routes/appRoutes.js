@@ -7,16 +7,41 @@ import {
 } from "./todoValidation.js"
 import validate from "../middleware/validationMiddleware.js"
 import { MutationLimit, ReadLimit } from "../middleware/rateLimitMiddleware.js"
+import { z } from "zod"
 
 const router = express.Router()
+const getTodosQuerySchema = z.object({
+    limit: z.coerce.number().int().min(1).max(50).default(15),
+    cursor: z.coerce.number().int().positive().optional(),
+    status: z.enum(["all", "active", "done"]).default("all"),
+})
 
 router.get("/", ReadLimit ,async (req, res) => {
+    const { limit, cursor, status } = getTodosQuerySchema.parse(req.query)
+
     const todos = await prisma.todo.findMany({
         where: {
-            userId: req.userId
-        }
+            userId: req.userId,
+            ...(status !== "all" && { completed: status === "done" }),
+            ...(cursor !== undefined && { id: { lt: cursor } }),
+        },
+        orderBy: {
+            id: "desc",
+        },
+        take: limit + 1,
     })
-    res.json({todos})
+
+    const hasMore = todos.length > limit
+    const pageTodos = hasMore ? todos.slice(0, limit) : todos
+    const nextCursor = hasMore
+        ? pageTodos[pageTodos.length - 1].id
+        : null
+
+    res.json({
+        todos: pageTodos,
+        nextCursor,
+        hasMore,
+    })
 })
 
 router.post("/", validate(insertTodoSchema), MutationLimit, async (req, res) => {
