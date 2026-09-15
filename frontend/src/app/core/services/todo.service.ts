@@ -9,8 +9,12 @@ export type Todo = {
   userId: number;
 };
 
+export type TodoFilter = 'all' | 'active' | 'done';
+
 type TodosResponse = {
   todos: Todo[];
+  nextCursor: number | null;
+  hasMore: boolean;
 };
 
 @Injectable({
@@ -21,8 +25,14 @@ export class TodoService {
 
   constructor(private http: HttpClient) {}
 
-  getTodos() {
-    return this.http.get<TodosResponse>(this.apiUrl);
+  getTodos(limit: number, cursor?: number, status: TodoFilter = 'all') {
+    return this.http.get<TodosResponse>(this.apiUrl, {
+      params: {
+        limit,
+        status,
+        ...(cursor !== undefined && { cursor }),
+      },
+    });
   }
 
   createTodo(task: string) {

@@ -58,10 +58,23 @@
           </article>
         }
       </section>
+
+      @if (hasMore()) {
+        <div class="todo-toolbar">
+          <button
+            class="filter-button"
+            type="button"
+            [disabled]="isLoadingMore()"
+            (click)="loadMore()"
+          >
+            {{ isLoadingMore() ? 'Loading...' : 'Load more' }}
+          </button>
+        </div>
+      }
     } @else {
       <section class="empty-state" aria-label="No todos">
-        <h2>No todos yet</h2>
-        <p>Add your first task and keep the day moving.</p>
+        <h2>No {{ filter() === 'all' ? '' : filter() }} todos</h2>
+        <p>{{ filter() === 'all' ? 'Add your first task and keep the day moving.' : 'Try another filter.' }}</p>
       </section>
     }
   </section>

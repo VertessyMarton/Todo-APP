@@ -2,9 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
-import { Todo, TodoService } from '../../../../core/services/todo.service';
-
-type TodoFilter = 'all' | 'active' | 'done';
+import { Todo, TodoFilter, TodoService } from '../../../../core/services/todo.service';
 
 @Component({
   selector: 'app-todos',
@@ -13,12 +11,18 @@ type TodoFilter = 'all' | 'active' | 'done';
   styleUrl: './todos.component.scss',
 })
 export class TodosComponent implements OnInit {
+  private readonly pageSize = 15;
+  private requestVersion = 0;
+
   todos = signal<Todo[]>([]);
   newTask = signal('');
   filter = signal<TodoFilter>('all');
   errorMessage = signal('');
   isLoading = signal(false);
   isAdding = signal(false);
+  nextCursor = signal<number | null>(null);
+  hasMore = signal(true);
+  isLoadingMore = signal(false);
 
   visibleTodos = computed(() => {
     const todos = this.todos();
@@ -45,17 +49,65 @@ export class TodosComponent implements OnInit {
   }
 
   loadTodos() {
+    const requestVersion = ++this.requestVersion;
+
     this.errorMessage.set('');
     this.isLoading.set(true);
+    this.isLoadingMore.set(false);
+    this.nextCursor.set(null);
+    this.hasMore.set(true);
 
-    this.todoService.getTodos().subscribe({
+    this.todoService.getTodos(this.pageSize, undefined, this.filter()).subscribe({
       next: (response) => {
+        if (requestVersion !== this.requestVersion) {
+          return;
+        }
+
         this.todos.set(response.todos);
+        this.nextCursor.set(response.nextCursor);
+        this.hasMore.set(response.hasMore);
         this.isLoading.set(false);
       },
       error: () => {
+        if (requestVersion !== this.requestVersion) {
+          return;
+        }
+
         this.errorMessage.set('Could not load your todos.');
         this.isLoading.set(false);
+      },
+    });
+  }
+
+  loadMore() {
+    const cursor = this.nextCursor();
+    const requestVersion = this.requestVersion;
+
+    if (cursor === null || !this.hasMore() || this.isLoadingMore()) {
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.isLoadingMore.set(true);
+
+    this.todoService.getTodos(this.pageSize, cursor, this.filter()).subscribe({
+      next: (response) => {
+        if (requestVersion !== this.requestVersion) {
+          return;
+        }
+
+        this.todos.update((todos) => [...todos, ...response.todos]);
+        this.nextCursor.set(response.nextCursor);
+        this.hasMore.set(response.hasMore);
+        this.isLoadingMore.set(false);
+      },
+      error: () => {
+        if (requestVersion !== this.requestVersion) {
+          return;
+        }
+
+        this.errorMessage.set('Could not load more todos.');
+        this.isLoadingMore.set(false);
       },
     });
   }
@@ -72,7 +124,9 @@ export class TodosComponent implements OnInit {
 
     this.todoService.createTodo(task).subscribe({
       next: (todo) => {
-        this.todos.update((todos) => [todo, ...todos]);
+        if (this.filter() !== 'done') {
+          this.todos.update((todos) => [todo, ...todos]);
+        }
         this.newTask.set('');
         this.isAdding.set(false);
       },
@@ -112,7 +166,12 @@ export class TodosComponent implements OnInit {
   }
 
   setFilter(filter: TodoFilter) {
+    if (filter === this.filter()) {
+      return;
+    }
+
     this.filter.set(filter);
+    this.loadTodos();
   }
 
   logout() {
