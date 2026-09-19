@@ -9,7 +9,10 @@ export async function register({ username, password }) {
     await prisma.user.create({
         data: {
             username,
-            password: hashedPassword
+            password: hashedPassword,
+            lists: {
+                create: { name: "My todos" }
+            }
         }
     })
 }

@@ -3,7 +3,8 @@ import * as todoService from "../services/todoService.js"
 import {  
     insertTodoSchema,
     deleteTodoSchema,
-    updateTodoSchema 
+    updateTodoSchema, 
+    moveTodoSchema
 } from "./todoValidation.js"
 import validate from "../middleware/validationMiddleware.js"
 import { MutationLimit, ReadLimit } from "../middleware/rateLimitMiddleware.js"
@@ -14,6 +15,7 @@ const getTodosQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(50).default(15),
     cursor: z.coerce.number().int().positive().optional(),
     status: z.enum(["all", "active", "done"]).default("all"),
+    listId: z.coerce.number().int().positive().optional(),
 })
 
 router.get("/", ReadLimit, async (req, res) => {
@@ -35,6 +37,11 @@ router.put("/:id", validate(updateTodoSchema), MutationLimit, async (req, res) =
 router.delete("/:id", validate(deleteTodoSchema), MutationLimit, async (req, res) => {
     await todoService.deleteTodo(req.userId, parseInt(req.params.id))
     res.json({ message: "Todo deleted" })
+})
+
+router.patch("/:id", validate(moveTodoSchema), MutationLimit, async (req, res) => {
+    const todo = await todoService.moveTodo(req.userId, parseInt(req.params.id), req.body)
+    res.json(todo)
 })
 
 export default router
