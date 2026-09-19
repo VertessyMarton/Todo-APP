@@ -1,6 +1,7 @@
 import express from "express"
 import authRoutes from "./routes/authRoutes.js"
-import appRoutes from "./routes/appRoutes.js"
+import todoRoutes from "./routes/todoRoutes.js"
+import todoListRoutes from "./routes/todoListRoutes.js"
 import authMiddleware from "./middleware/authMiddleware.js"
 import cors from "cors";
 import errorHandler from "./middleware/errorHandler.js";
@@ -20,7 +21,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes)
-app.use("/todos", authMiddleware, appRoutes)
+app.use("/todos", authMiddleware, todoRoutes)
+app.use("/lists", authMiddleware, todoListRoutes)
 
 app.use((req, res, next) => {
   next(AppError.notFound(`Cannot ${req.method} ${req.originalUrl}`))
