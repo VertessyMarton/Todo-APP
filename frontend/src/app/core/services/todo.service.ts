@@ -6,7 +6,8 @@ export type Todo = {
   id: number;
   task: string;
   completed: boolean;
-  userId: number;
+  listId: number;
+  list?: { id: number; name: string };
 };
 
 export type TodoFilter = 'all' | 'active' | 'done';
@@ -25,22 +26,27 @@ export class TodoService {
 
   constructor(private http: HttpClient) {}
 
-  getTodos(limit: number, cursor?: number, status: TodoFilter = 'all') {
+  getTodos(limit: number, cursor?: number, status: TodoFilter = 'all', listId?: number) {
     return this.http.get<TodosResponse>(this.apiUrl, {
       params: {
         limit,
+        ...(listId !== undefined && { listId }),
         status,
         ...(cursor !== undefined && { cursor }),
       },
     });
   }
 
-  createTodo(task: string) {
-    return this.http.post<Todo>(this.apiUrl, { task });
+  createTodo(task: string, listId: number) {
+    return this.http.post<Todo>(this.apiUrl, { task, listId });
   }
 
   updateTodo(id: number, completed: boolean) {
     return this.http.put<Todo>(`${this.apiUrl}/${id}`, { completed });
+  }
+
+  moveTodo(id: number, listId: number) {
+    return this.http.patch<Todo>(`${this.apiUrl}/${id}`, { listId });
   }
 
   deleteTodo(id: number) {
