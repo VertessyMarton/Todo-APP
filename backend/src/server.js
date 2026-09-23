@@ -6,15 +6,19 @@ import authMiddleware from "./middleware/authMiddleware.js"
 import cors from "cors";
 import errorHandler from "./middleware/errorHandler.js";
 import AppError from "./utils/AppError.js";
+import cookieParser from "cookie-parser"
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "*"
+    origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+    credentials: true
 }))
 
 app.use(express.json())
+
+app.use(cookieParser())
 
 app.get("/", (req, res) => {
   res.json({ ok: true, service: "todo-api" });
@@ -31,5 +35,5 @@ app.use((req, res, next) => {
 app.use(errorHandler)
 
 
-app.listen(PORT, () => console.log(`Serves has started on port ${PORT}`))
+app.listen(PORT, () => console.log(`Server has started on port ${PORT}`))
 

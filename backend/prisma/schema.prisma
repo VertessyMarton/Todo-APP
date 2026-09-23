@@ -8,10 +8,11 @@ generator client {
 }
 
 model User {
-  id       Int        @id @default(autoincrement())
-  username String     @unique
+  id       Int            @id @default(autoincrement())
+  username String         @unique
   password String
   lists    TodoList[]
+  tokens   RefreshToken[]
 }
 
 model Todo {
@@ -28,4 +29,16 @@ model TodoList {
   userId Int
   user   User   @relation(fields: [userId], references: [id])
   todos  Todo[]
+}
+
+model RefreshToken {
+  id            Int       @id @default(autoincrement())
+  refreshToken  String    @unique
+  sessionId     String
+  expiresAt     DateTime
+  revoked       Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedReason String?
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
 }

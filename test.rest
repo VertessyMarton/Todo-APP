@@ -24,7 +24,21 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/todos
+# @name login
+POST http://localhost:3000/auth/refresh
+
+###
+POST http://localhost:3000/auth/logout
+
+###
+POST http://localhost:3000/auth/logout/all
+
+###
+GET http://localhost:3000/todos?limit=15&listId=26&status=all
+Authorization: Bearer {{token}}
+
+###
+GET http://localhost:3000/lists
 Authorization: Bearer {{token}}
 
 ###
@@ -33,11 +47,39 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "task": "Finish the project"
+    "task": "masodik",
+    "listId": 27
 }
 
 ###
-PUT http://localhost:3000/todos/2
+POST http://localhost:3000/lists
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "masodik"
+}
+
+###
+PUT http://localhost:3000/lists/5
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "nigger"
+}
+
+###
+PATCH  http://localhost:3000/todos/33
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "listId": "20"
+}
+
+###
+PUT http://localhost:3000/todos/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -46,5 +88,9 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/todos/2
+DELETE http://localhost:3000/lists/5
+Authorization: Bearer {{token}}
+
+###
+DELETE http://localhost:3000/todos/1
 Authorization: Bearer {{token}}
