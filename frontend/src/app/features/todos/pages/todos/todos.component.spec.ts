@@ -155,4 +155,13 @@ describe('TodosComponent list integration', () => {
     component.moveTodo(todo);
     http.expectOne((r) => r.method === 'PATCH').flush({}, { status: 500, statusText: 'Error' });
   });
+  it('shows a sign-out error and allows retry when revocation fails', () => {
+    component.logout(true);
+    expect(component.isSigningOut()).toBe(true);
+    http
+      .expectOne((r) => r.method === 'POST' && r.url.endsWith('/auth/logout/all'))
+      .flush({}, { status: 500, statusText: 'Error' });
+    expect(component.isSigningOut()).toBe(false);
+    expect(component.signOutError()).toContain('Could not sign out from all devices');
+  });
 });

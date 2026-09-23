@@ -32,7 +32,12 @@ export class TodosComponent implements OnInit {
   destinationListId: number | null = null;
   moveError = signal('');
 
+  accountMenuOpen = signal(false);
+
   dismissTodoMenu(event: Event) {
+    if (!(event.target instanceof Element) || !event.target.closest('.account-actions')) {
+      this.accountMenuOpen.set(false);
+    }
     if (!(event.target instanceof Element) || !event.target.closest('.todo-actions')) {
       this.openTodoMenu.set(null);
     }
@@ -333,8 +338,25 @@ export class TodosComponent implements OnInit {
     });
   }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  isSigningOut = signal(false);
+  signOutError = signal('');
+
+  logout(allDevices = false) {
+    if (this.isSigningOut()) return;
+    this.isSigningOut.set(true);
+    this.signOutError.set('');
+    this.authService.logout(allDevices).subscribe({
+      next: () => {
+        void this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.isSigningOut.set(false);
+        this.signOutError.set(
+          allDevices
+            ? 'Could not sign out from all devices. Please try again.'
+            : 'Could not sign out. Please try again.',
+        );
+      },
+    });
   }
 }
