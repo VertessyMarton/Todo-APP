@@ -5,9 +5,111 @@
         <h1 id="todos-title">Your todos</h1>
       </div>
 
-      <button class="logout-button" type="button" (click)="logout()">Sign out</button>
+      <div
+        class="account-actions relative shrink-0"
+        (keydown.escape)="
+          accountMenuOpen.set(false); accountTrigger.focus(); $event.stopPropagation()
+        "
+      >
+        <button
+          #accountTrigger
+          class="logout-button flex items-center gap-2"
+          type="button"
+          (click)="accountMenuOpen.set(!accountMenuOpen())"
+          [disabled]="isSigningOut()"
+          [attr.aria-expanded]="accountMenuOpen()"
+          aria-controls="account-options"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="8" r="3" />
+            <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+          </svg>
+          {{ isSigningOut() ? 'Signing out...' : 'Account' }}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path [attr.d]="accountMenuOpen() ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'" />
+          </svg>
+        </button>
+        @if (accountMenuOpen()) {
+          <div
+            id="account-options"
+            class="absolute right-0 z-20 mt-2 w-64 max-w-[85vw] rounded-lg border border-gray-200 bg-white p-1 shadow-lg"
+          >
+            <button
+              class="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+              type="button"
+              (click)="accountMenuOpen.set(false); logout()"
+              [disabled]="isSigningOut()"
+            >
+              <svg
+                class="shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 4H4v16h5M10 12h11m-4-4 4 4-4 4" />
+              </svg>
+              <span
+                >Sign out<span class="mt-0.5 block text-xs text-gray-500"
+                  >This browser only</span
+                ></span
+              >
+            </button>
+            <div class="mx-3 border-t border-gray-100"></div>
+            <button
+              class="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-3 text-left text-sm text-red-700 hover:bg-red-50"
+              type="button"
+              (click)="accountMenuOpen.set(false); logout(true)"
+              [disabled]="isSigningOut()"
+            >
+              <svg
+                class="shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 17H3V4h17v5M6 21h5m-3-4v4" />
+                <rect x="15" y="12" width="7" height="10" rx="1" />
+              </svg>
+              <span>Sign out from all devices</span>
+            </button>
+          </div>
+        }
+      </div>
     </header>
 
+    @if (signOutError()) {
+      <p class="message error-message" role="alert">{{ signOutError() }}</p>
+    }
     <section class="lists-section" aria-labelledby="lists-title">
       <h2 id="lists-title" class="section-title">Your lists</h2>
       @if (listError()) {

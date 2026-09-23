@@ -1,5 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import {
+  Observable,
+  catchError,
+  defer,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { API_URL } from '../api-url';
 
 type RegisterPaylaod = {
@@ -23,6 +35,9 @@ type LoginResponse = {
 export class AuthService {
   private readonly apiUrl = API_URL;
 
+  private refreshRequest?: Observable<string>;
+  private signingOut = false;
+
   constructor(private http: HttpClient) {}
 
   register(payload: RegisterPaylaod) {
@@ -30,7 +45,9 @@ export class AuthService {
   }
 
   login(payload: LoginPaylaod) {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, payload);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, payload, {
+      withCredentials: true,
+    });
   }
 
   saveToken(token: string) {
@@ -45,7 +62,52 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  logout() {
+  clearToken() {
     localStorage.removeItem('accessToken');
+  }
+
+  refreshAccessToken(): Observable<string> {
+    if (this.signingOut) return throwError(() => new Error('Sign-out in progress'));
+    if (!this.refreshRequest) {
+      this.refreshRequest = this.http
+        .post<LoginResponse>(
+          `${this.apiUrl}/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+          },
+        )
+        .pipe(
+          map((response) => response.accessToken),
+          tap((token) => this.saveToken(token)),
+          finalize(() => {
+            this.refreshRequest = undefined;
+          }),
+          shareReplay({ bufferSize: 1, refCount: false }),
+        );
+    }
+    return this.refreshRequest;
+  }
+
+  logout(allDevices = false) {
+    return defer(() => {
+      this.signingOut = true;
+      // Let an already-running refresh finish before sending its replacement cookie to logout.
+      const ready: Observable<string | null> = this.refreshRequest ?? of(null);
+      return ready.pipe(
+        catchError(() => of(null)),
+        switchMap(() =>
+          this.http.post<{ message: string }>(
+            `${this.apiUrl}/auth/logout${allDevices ? '/all' : ''}`,
+            {},
+            { withCredentials: true },
+          ),
+        ),
+        tap(() => this.clearToken()),
+        finalize(() => {
+          this.signingOut = false;
+        }),
+      );
+    });
   }
 }
