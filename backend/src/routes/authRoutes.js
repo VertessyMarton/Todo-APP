@@ -12,8 +12,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 const refreshCookieOptions = {
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'none',
-    path: '/auth',
+    sameSite: 'strict',
+    path: 'api/auth',
 };
 
 router.post("/register", validate(registerSchema), requireFrontendOrigin, RegisterLimit, async (req, res) => {
