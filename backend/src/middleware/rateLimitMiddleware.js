@@ -4,7 +4,7 @@ export function limiter(limit, ttl = 60000) {
     return rateLimit({
         windowMs: ttl,
         limit: limit,
-        skip: process.env.NODE_ENV === 'test',
+        skip: () => process.env.NODE_ENV === 'test',
         message: { 'message': 'Too many requests, please try again later!' }  
     })
 }
