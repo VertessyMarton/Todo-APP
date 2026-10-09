@@ -9,12 +9,18 @@ import AppError from "./utils/AppError.js";
 import cookieParser from "cookie-parser"
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import prisma from "./prismaClient.js"
 
 const app = express()
 const PORT = process.env.PORT || 3000
 const frontendDirectory = fileURLToPath(
   new URL('../public/', import.meta.url),
 );
+
+const healthCheckResponse = {
+    ok: true,
+    service: "todo-api"
+}
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:4200',
@@ -26,7 +32,26 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.get("/api/health", (req, res) => {
-  res.json({ ok: true, service: "todo-api" });
+  res.json(healthCheckResponse);
+});
+
+app.get("/api/health/db", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+
+    res.json({
+      ...healthCheckResponse,
+      database: "up",
+    });
+  } catch (error) {
+    console.error("Database healthcheck failed: ", error)
+
+    res.status(503).json({
+      ok: false,
+      service: "todo-api",
+      database: "down",
+    });
+  }
 });
 
 app.use("/api/auth", authRoutes)
